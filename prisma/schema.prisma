@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model personas {
+  id              Int                      @id @default(autoincrement())
+  surname         String                   @db.VarChar(100)
+  firstName       String                   @db.VarChar(100)
+  phone           String?                  @db.VarChar(20)
+  dpi             String?                  @unique(map: "dpi") @db.VarChar(20)
+  address         String?                  @db.VarChar(255)
+  birthDate       DateTime?                @db.Date
+  age             Int?
+  gender          personas_gender
+  department      String                   @db.Char(2)
+  municipality    String                   @db.Char(4)
+  community       String?                  @db.VarChar(100)
+  confidenceLevel personas_confidenceLevel @default(indeciso)
+  departamento    departamento             @relation(fields: [department], references: [codigo], map: "fk_personas_departamento")
+  municipio       municipio                @relation(fields: [municipality], references: [codigo], map: "fk_personas_municipio")
+
+  @@index([department], map: "fk_personas_departamento")
+  @@index([municipality], map: "fk_personas_municipio")
+}
+
+model roles {
+  id       Int        @id @default(autoincrement())
+  nombre   String     @unique(map: "nombre") @db.VarChar(50)
+  usuarios usuarios[]
+}
+
+model usuarios {
+  id                   Int       @id @default(autoincrement())
+  role_id              Int
+  codigo_municipio     String    @db.Char(4)
+  email                String    @unique(map: "email") @db.VarChar(150)
+  password             String    @db.VarChar(255)
+  ultimo_inicio_sesion DateTime? @db.Timestamp(0)
+  creado_en            DateTime? @default(now()) @db.Timestamp(0)
+  municipio            municipio @relation(fields: [codigo_municipio], references: [codigo], map: "fk_codigo_municipio")
+  roles                roles     @relation(fields: [role_id], references: [id], onUpdate: NoAction, map: "usuarios_ibfk_2")
+
+  @@index([role_id], map: "role_id")
+  @@index([codigo_municipio], map: "fk_codigo_municipio")
+}
+
+model departamento {
+  codigo    String      @id @db.Char(2)
+  nombre    String      @db.VarChar(100)
+  municipio municipio[]
+  personas  personas[]
+}
+
+model municipio {
+  codigo              String        @id @db.Char(4)
+  nombre              String        @db.VarChar(100)
+  departamento_codigo String?       @db.Char(2)
+  departamento        departamento? @relation(fields: [departamento_codigo], references: [codigo], onDelete: NoAction, onUpdate: NoAction, map: "municipio_ibfk_1")
+  personas            personas[]
+  usuarios            usuarios[]
+
+  @@index([departamento_codigo], map: "departamento_codigo")
+}
+
+enum personas_gender {
+  masculino
+  femenino
+  otro
+}
+
+enum personas_confidenceLevel {
+  indeciso
+  seguro
+  no_seguro @map("no-seguro")
+}
