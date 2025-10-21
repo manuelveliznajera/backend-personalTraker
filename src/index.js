@@ -9,6 +9,8 @@ import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
+
+// Crear la aplicación de Express
 const app = express();
 const PORT = process.env.PORT || 4000;
 
