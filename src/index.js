@@ -9,7 +9,8 @@ import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
-
+//Editando mi archivo Local y lo enviare a GitHub
+const manuel = "Manuel";
 // Crear la aplicación de Express
 const app = express();
 const PORT = process.env.PORT || 4000;
